@@ -33,13 +33,15 @@ CONFIDENCE_PASS = -135
 # Fourier basis
 p = 3
 try:
-    f = open('weights.pkl', 'rb')
+    f = open('./outputs/2024-12-09 20:26:07/weights.pkl', 'rb')
     data = pickle.load(f)
     if 'W' not in data or 'N' not in data:
         print('Matrix W (or N) is missing in the dictionary.')
         exit(-1)
     w = data['W']
     eta = data['N']
+    print(w)
+    print(eta)
 
     # Dimensionality checks
     if w.shape[1] != eta.shape[0]:

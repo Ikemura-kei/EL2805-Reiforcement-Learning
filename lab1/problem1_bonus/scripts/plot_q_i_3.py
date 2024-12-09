@@ -17,8 +17,8 @@ class Info:
         self.color = color
     
 info_list = []
-info_list.append(Info(run_name='q_i_3_alpha=0.6_2024-12-09 14:42:58', legend='alpha=0.6, epsilon=0.1', color='r'))
-info_list.append(Info(run_name='q_i_3_alpha=0.85_2024-12-09 14:44:20', legend='alpha=0.85, epsilon=0.1', color='b'))
+info_list.append(Info(run_name='q_i_3_alpha=0.6_2024-12-09 18:58:46', legend='alpha=0.6, epsilon=0.1', color='r'))
+info_list.append(Info(run_name='q_i_3_alpha=0.85_2024-12-09 19:00:47', legend='alpha=0.85, epsilon=0.1', color='b'))
 
 legends = []
 for info in info_list:
@@ -32,6 +32,7 @@ plt.title('Value function trajectory')
 plt.xlabel('Episodes')
 plt.ylabel('Value function')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'value_func_traj.png'))
 plt.show()
 
@@ -44,5 +45,6 @@ plt.title('Winning rates')
 plt.xlabel('Episodes')
 plt.ylabel('Winning rate')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'win_rates.png'))
 plt.show()

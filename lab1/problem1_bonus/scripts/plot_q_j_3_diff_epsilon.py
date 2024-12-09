@@ -17,9 +17,9 @@ class Info:
         self.color = color
     
 info_list = []
-info_list.append(Info(run_name='q_j_3_epsilon=0.1_delta_0.6_alpha=0.6666_2024-12-09 15:22:27', legend='epsilon=0.1, delta=0.6, alpha=2/3', color='b'))
-info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.6666_2024-12-09 15:14:59', legend='epsilon=0.2, delta=0.6, alpha=2/3', color='r'))
-info_list.append(Info(run_name='q_j_3_epsilon=0.3_delta_0.6_alpha=0.6666_2024-12-09 15:24:12', legend='epsilon=0.3, delta=0.6, alpha=2/3', color='k'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.1_delta_0.6_alpha=0.6666_2024-12-09 19:09:56', legend='epsilon=0.1, delta=0.6, alpha=2/3', color='b'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.6666_2024-12-09 18:59:37', legend='epsilon=0.2, delta=0.6, alpha=2/3', color='r'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.3_delta_0.6_alpha=0.6666_2024-12-09 19:12:37', legend='epsilon=0.3, delta=0.6, alpha=2/3', color='k'))
 
 legends = []
 for info in info_list:
@@ -33,6 +33,7 @@ plt.title('Value function trajectory')
 plt.xlabel('Episodes')
 plt.ylabel('Value function')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'value_func_traj.png'))
 plt.show()
 
@@ -45,5 +46,6 @@ plt.title('Winning rates')
 plt.xlabel('Episodes')
 plt.ylabel('Winning rate')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'win_rates.png'))
 plt.show()

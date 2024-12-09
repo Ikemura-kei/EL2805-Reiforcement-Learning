@@ -7,8 +7,32 @@ import shutil
 import json
 import argparse
 
+def evaluation(eval_env: MazeEnv, q_func: np.ndarray, max_eval_episode: int=1000):
+    win_cnt = 0
+    for j in range(max_eval_episode):
+        terminated = truncated = False
+        start = (0, 0, 0, 6, 4)
+        s_idx = eval_env.states_to_idx[start]
 
-def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, q_func_init='encourage_move'):
+        i = 0
+        while True:
+            a_idx = np.argmax(q_func[s_idx])
+
+            s_prime_idx, reward, terminated, truncated, info = eval_env.step(
+                s_idx, a_idx, i, do_render=False, show=False)
+            
+            if eval_env.idx_to_states[s_idx] == 'win':
+                win_cnt += 1
+
+            s_idx = s_prime_idx
+            i+=1
+            
+            if terminated or truncated:
+                break
+            
+    return float(win_cnt)/(max_eval_episode)
+
+def q_learning(maze_env: MazeEnv, eval_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, q_func_init='encourage_move'):
     start_pnt = (0, 0, 0, 6, 4)
 
     # -- initialize q-function --
@@ -27,7 +51,7 @@ def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int =
     state_visits = np.zeros((maze_env.n_states, maze_env.n_actions))
 
     # -- we visualize the policy per some iterations --
-    show_period = max_eposide // 100
+    show_period = max_eposide // 50
 
     # -- track the best performances --
     best_win_rate = 0
@@ -42,7 +66,7 @@ def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int =
             s_idx = maze_env.states_to_idx[start]
 
             if ((episode+1) % show_period) == 0:
-                win_rate = win_cnt / show_period
+                win_rate = evaluation(eval_env, q_func, 500)
                 win_rate_list.append((episode, win_rate))
 
                 if win_rate > best_win_rate:
@@ -99,7 +123,7 @@ def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int =
     return q_func, q_func_init_traj, best_win_rate, win_rate_list
 
 
-def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, delta=0.5, q_func_init='encourage_move'):
+def sarsa(maze_env: MazeEnv, eval_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, delta=0.5, q_func_init='encourage_move'):
     start_pnt = (0, 0, 0, 6, 4)
 
     # -- initialize q-function --
@@ -117,7 +141,7 @@ def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 5000
     state_visits = np.zeros((maze_env.n_states, maze_env.n_actions))
 
     # -- we visualize the policy per some iterations --
-    show_period = max_eposide // 100
+    show_period = max_eposide // 50
 
     # -- track the best performances --
     best_win_rate = 0
@@ -134,7 +158,7 @@ def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 5000
             s_idx = maze_env.states_to_idx[start]
 
             if ((episode+1) % show_period) == 0:
-                win_rate = win_cnt / show_period
+                win_rate = evaluation(eval_env, q_func, 500)
                 win_rate_list.append((episode, win_rate))
 
                 if win_rate > best_win_rate:
@@ -241,7 +265,9 @@ if __name__ == "__main__":
     fix_minotaur = args.fix_minotaur
     horizon = args.horizon
 
-    maze_env = MazeEnv(maze, episode_len=horizon,
+    train_env = MazeEnv(maze, episode_len=horizon,
+                       minotaur_fix=fix_minotaur, beta=0.65)
+    eval_env = MazeEnv(maze, episode_len=horizon,
                        minotaur_fix=fix_minotaur, beta=0.65)
 
     algorithm = args.algorithm
@@ -253,10 +279,10 @@ if __name__ == "__main__":
     delta = args.delta
     q_func_init = args.q_func_init
     if algorithm == 'sarsa':
-        q_func, q_func_init_traj, best_win_rate, win_rate_list = sarsa(maze_env, lambda_value, max_eposide,
+        q_func, q_func_init_traj, best_win_rate, win_rate_list = sarsa(train_env, eval_env, lambda_value, max_eposide,
                                                                        eps_init, visualize=visualize, alpha=alpha, delta=delta, q_func_init=q_func_init)
     elif algorithm == 'q_learning':
-        q_func, q_func_init_traj, best_win_rate, win_rate_list = q_learning(maze_env, lambda_value, max_eposide,
+        q_func, q_func_init_traj, best_win_rate, win_rate_list = q_learning(train_env, eval_env, lambda_value, max_eposide,
                                                                             eps_init, visualize=visualize, alpha=alpha, q_func_init=q_func_init)
     else:
         raise NotImplementedError

@@ -17,10 +17,10 @@ class Info:
         self.color = color
     
 info_list = []
-info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.99_alpha=0.6666_2024-12-09 15:20:21', legend='epsilon=0.2, delta=0.99, alpha=2/3', color='c'))
-info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.8_alpha=0.6666_2024-12-09 15:18:37', legend='epsilon=0.2, delta=0.8, alpha=2/3', color='y'))
-info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.85_2024-12-09 15:17:04', legend='epsilon=0.2, delta=0.6, alpha=0.85', color='g'))
-info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.6666_2024-12-09 15:14:59', legend='epsilon=0.2, delta=0.6, alpha=2/3', color='r'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.99_alpha=0.6666_2024-12-09 19:07:15', legend='epsilon=0.2, delta=0.99, alpha=2/3', color='c'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.8_alpha=0.6666_2024-12-09 19:04:45', legend='epsilon=0.2, delta=0.8, alpha=2/3', color='y'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.85_2024-12-09 19:02:20', legend='epsilon=0.2, delta=0.6, alpha=0.85', color='g'))
+info_list.append(Info(run_name='q_j_3_epsilon=0.2_delta_0.6_alpha=0.6666_2024-12-09 18:59:37', legend='epsilon=0.2, delta=0.6, alpha=2/3', color='r'))
 
 legends = []
 for info in info_list:
@@ -34,6 +34,7 @@ plt.title('Value function trajectory')
 plt.xlabel('Episodes')
 plt.ylabel('Value function')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'value_func_traj.png'))
 plt.show()
 
@@ -46,5 +47,6 @@ plt.title('Winning rates')
 plt.xlabel('Episodes')
 plt.ylabel('Winning rate')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'win_rates.png'))
 plt.show()

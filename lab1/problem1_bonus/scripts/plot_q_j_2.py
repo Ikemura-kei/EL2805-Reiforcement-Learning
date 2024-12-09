@@ -17,11 +17,11 @@ class Info:
         self.color = color
     
 info_list = []
-info_list.append(Info(run_name='q_j_2_epsilon=0.1_rand_q0_2024-12-09 14:57:30', legend='epsilon=0.1, rand_init', color='r'))
-info_list.append(Info(run_name='q_j_2_epsilon=0.1_zeros_q0_2024-12-09 14:55:59', legend='epsilon=0.1, zeros_init', color='b'))
-info_list.append(Info(run_name='q_j_2_epsilon=0.3_encourage_q0_2024-12-09 14:59:04', legend='epsilon=0.3, encourage_move_init', color='g'))
-info_list.append(Info(run_name='q_j_2_epsilon=0.2_encourage_q0_2024-12-09 15:01:24', legend='epsilon=0.2, encourage_move_init', color='y'))
-info_list.append(Info(run_name='q_j_2_epsilon=0.1_encourage_q0_2024-12-09 15:03:13', legend='epsilon=0.1, encourage_move_init', color='c'))
+info_list.append(Info(run_name='q_j_2_epsilon=0.1_rand_q0_2024-12-09 19:01:30', legend='epsilon=0.1, rand_init', color='r'))
+info_list.append(Info(run_name='q_j_2_epsilon=0.1_zeros_q0_2024-12-09 18:59:06', legend='epsilon=0.1, zeros_init', color='b'))
+info_list.append(Info(run_name='q_j_2_epsilon=0.3_encourage_q0_2024-12-09 19:03:46', legend='epsilon=0.3, encourage_move_init', color='g'))
+info_list.append(Info(run_name='q_j_2_epsilon=0.2_encourage_q0_2024-12-09 19:08:07', legend='epsilon=0.2, encourage_move_init', color='y'))
+info_list.append(Info(run_name='q_j_2_epsilon=0.1_encourage_q0_2024-12-09 19:11:07', legend='epsilon=0.1, encourage_move_init', color='c'))
 
 legends = []
 for info in info_list:
@@ -35,6 +35,7 @@ plt.title('Value function trajectory')
 plt.xlabel('Episodes')
 plt.ylabel('Value function')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'value_func_traj.png'))
 plt.show()
 
@@ -47,5 +48,6 @@ plt.title('Winning rates')
 plt.xlabel('Episodes')
 plt.ylabel('Winning rate')
 plt.legend(legends)
+plt.grid(True)
 plt.savefig(os.path.join(analysis_dir, 'win_rates.png'))
 plt.show()
