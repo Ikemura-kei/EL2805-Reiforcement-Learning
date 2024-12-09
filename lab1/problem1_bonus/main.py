@@ -5,17 +5,24 @@ import os
 import datetime
 import shutil
 import json
+import argparse
 
 
-def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3):
+def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, q_func_init='encourage_move'):
     start_pnt = (0, 0, 0, 6, 4)
 
     # -- initialize q-function --
     q_func_init_traj = np.zeros((max_eposide, maze_env.n_actions))
-    q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
-    q_func += (1 - lambda_value)
-    q_func[..., maze_env.AGENT_ACTION_STAY] = - (1 - lambda_value)
-
+    
+    if q_func_init == 'encourage_move':
+        q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
+        q_func += (1 - lambda_value)
+        q_func[..., maze_env.AGENT_ACTION_STAY] = - (1 - lambda_value)
+    elif q_func_init == 'zeros':
+        q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
+    elif q_func_init == 'rand':
+        q_func = np.random.randn(maze_env.n_states, maze_env.n_actions) * 0.1
+        
     # -- tracks number of visits per state --
     state_visits = np.zeros((maze_env.n_states, maze_env.n_actions))
 
@@ -58,7 +65,7 @@ def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int =
                     a_idx = np.argmax(q_func[s_idx])
 
                 s_prime_idx, reward, terminated, truncated, info = maze_env.step(
-                    s_idx, a_idx, t, do_render=((((episode+1) % show_period) == 0) and visualize), show=visualize)
+                    s_idx, a_idx, do_render=((((episode+1) % show_period) == 0) and visualize), show=visualize)
 
                 # -- q function update --
                 state_visits[s_idx, a_idx] += 1  # increment state visit
@@ -92,14 +99,19 @@ def q_learning(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int =
     return q_func, q_func_init_traj, best_win_rate, win_rate_list
 
 
-def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, delta=0.5):
+def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 50000, eps_init: float = 0.2, visualize=False, alpha=2.0/3, delta=0.5, q_func_init='encourage_move'):
     start_pnt = (0, 0, 0, 6, 4)
 
     # -- initialize q-function --
     q_func_init_traj = np.zeros((max_eposide, maze_env.n_actions))
-    q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
-    q_func += (1 - lambda_value)
-    q_func[..., maze_env.AGENT_ACTION_STAY] = - (1 - lambda_value)
+    if q_func_init == 'encourage_move':
+        q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
+        q_func += (1 - lambda_value)
+        q_func[..., maze_env.AGENT_ACTION_STAY] = - (1 - lambda_value)
+    elif q_func_init == 'zeros':
+        q_func = np.zeros((maze_env.n_states, maze_env.n_actions))
+    elif q_func_init == 'rand':
+        q_func = np.random.randn(maze_env.n_states, maze_env.n_actions) * 0.1
 
     # -- tracks number of visits per state --
     state_visits = np.zeros((maze_env.n_states, maze_env.n_actions))
@@ -117,7 +129,7 @@ def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 5000
         # -- the main training loop --
         for episode in range(max_eposide):
             eps = eps_init / ((episode+1)**delta) if delta > 0 else eps_init
-            
+
             start = start_pnt
             s_idx = maze_env.states_to_idx[start]
 
@@ -151,7 +163,7 @@ def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 5000
 
                 # -- q function update --
                 state_visits[s_idx, a_idx] += 1  # increment state visit
-                
+
                 # -- choose the next action --
                 if np.random.rand() <= eps:
                     # -- exploration --
@@ -191,10 +203,26 @@ def sarsa(maze_env: MazeEnv, lambda_value: float = 0.98, max_eposide: int = 5000
     return q_func, q_func_init_traj, best_win_rate, win_rate_list
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--fix_minotaur', action='store_true', default=False)
+parser.add_argument('--horizon', type=int, default=5000)
+parser.add_argument('--algorithm', type=str, default='sarsa')
+parser.add_argument('--lambda_value', type=float, default=0.98)
+parser.add_argument('--max_eposide', type=int, default=50000)
+parser.add_argument('--eps_init', type=float, default=0.1)
+parser.add_argument('--visualize', action='store_true', default=False)
+parser.add_argument('--alpha', type=float, default=2.0/3)
+parser.add_argument('--delta', type=float, default=0.6)
+parser.add_argument('--run_name', type=str, default='default_run')
+parser.add_argument('--q_func_init', type=str, default='rand',
+                    choices=['rand', 'zeros', 'encourage_move'])
+
 if __name__ == "__main__":
+    args = parser.parse_args()
+
     # -- create log dir --
-    out_dir = './outputs/{}'.format(
-        datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+    out_dir = './outputs/{}_{}'.format(args.run_name,
+                                       datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
     os.makedirs(out_dir, exist_ok=True)
 
     # -- save a copy of this code --
@@ -210,23 +238,26 @@ if __name__ == "__main__":
         [0, 1, 1, 1, 1, 1, 1, 0],
         [0, 0, 0, 0, 1, 2, 0, 0]])
 
-    fix_minotaur = False
-    horizon = 5000
+    fix_minotaur = args.fix_minotaur
+    horizon = args.horizon
+
     maze_env = MazeEnv(maze, episode_len=horizon,
                        minotaur_fix=fix_minotaur, beta=0.65)
-    algorithm = 'sarsa'  # 'sarsa' / 'q_learning'
-    lambda_value = 0.98
-    max_eposide = 50000
-    eps_init = 0.2
-    visualize = False
-    alpha = 0.75
-    delta = 0.6
+
+    algorithm = args.algorithm
+    lambda_value = args.lambda_value
+    max_eposide = args.max_eposide
+    eps_init = args.eps_init
+    visualize = args.visualize
+    alpha = args.alpha
+    delta = args.delta
+    q_func_init = args.q_func_init
     if algorithm == 'sarsa':
         q_func, q_func_init_traj, best_win_rate, win_rate_list = sarsa(maze_env, lambda_value, max_eposide,
-                                                                       eps_init, visualize=visualize, alpha=alpha, delta=delta)
+                                                                       eps_init, visualize=visualize, alpha=alpha, delta=delta, q_func_init=q_func_init)
     elif algorithm == 'q_learning':
         q_func, q_func_init_traj, best_win_rate, win_rate_list = q_learning(maze_env, lambda_value, max_eposide,
-                                                                            eps_init, visualize=visualize, alpha=alpha)
+                                                                            eps_init, visualize=visualize, alpha=alpha, q_func_init=q_func_init)
     else:
         raise NotImplementedError
 
@@ -236,8 +267,10 @@ if __name__ == "__main__":
     np.save(os.path.join(out_dir, 'win_rate_list.npy'), np.array(win_rate_list))
 
     # -- save hyper-params --
-    HYPER_PARAMS = {'fix_minotaur': fix_minotaur, 'horizon': horizon,
-                    'lambda_value': lambda_value, 'max_eposide': max_eposide,
-                    'eps_init': eps_init, 'visualize': visualize, 'best_win_rate': best_win_rate, 'alpha': alpha, 'algorithm': algorithm, 'delta': delta}
+    HYPER_PARAMS = {}
+    for k in dir(args):
+        if '__' in k or k[0] == '_':
+            continue
+        HYPER_PARAMS[k] = getattr(args, k)
     with open(os.path.join(out_dir, 'params.json'), 'w') as file:
         json.dump(HYPER_PARAMS, file, indent=6)

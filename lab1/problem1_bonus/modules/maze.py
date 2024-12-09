@@ -332,7 +332,7 @@ class MazeEnv():
         frame = cv2.cvtColor(img_plot, cv2.COLOR_RGBA2BGR)
         if show:
             cv2.imshow('Image', frame)
-            cv2.waitKey(50)
+            cv2.waitKey(100)
 
         if self.save_frames:
             return frame
